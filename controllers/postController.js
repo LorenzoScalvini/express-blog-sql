@@ -1,56 +1,38 @@
 const db = require("../config/db");
 
-// INDEX - Recupera la lista di post
-const getAllPosts = (req, res) => {
+exports.getAllPosts = (req, res) => {
   db.query("SELECT * FROM posts", (err, results) => {
     if (err) {
-      res.status(500).json({ error: "Errore nel recupero dei post" });
+      console.error(err);
+      res.status(500).send("Server error");
     } else {
       res.json(results);
     }
   });
 };
 
-// SHOW - Mostra un singolo post con i suoi tag
-const getPostById = (req, res) => {
-  const postId = req.params.id;
-
-  const query = `
-    SELECT p.*, t.name as tag 
-    FROM posts p 
-    LEFT JOIN post_tags pt ON p.id = pt.post_id 
-    LEFT JOIN tags t ON pt.tag_id = t.id 
-    WHERE p.id = ?;
-  `;
-
-  db.query(query, [postId], (err, results) => {
+exports.getPostById = (req, res) => {
+  const { id } = req.params;
+  db.query("SELECT * FROM posts WHERE id = ?", [id], (err, results) => {
     if (err) {
-      res.status(500).json({ error: "Errore nel recupero del post" });
+      console.error(err);
+      res.status(500).send("Server error");
     } else if (results.length === 0) {
-      res.status(404).json({ error: "Post non trovato" });
+      res.status(404).send("Post not found");
     } else {
-      const post = results[0];
-      post.tags = results.map((row) => row.tag).filter(Boolean);
-      res.json(post);
+      res.json(results[0]);
     }
   });
 };
 
-// DESTROY - Elimina un post
-const deletePostById = (req, res) => {
-  const postId = req.params.id;
-
-  db.query("DELETE FROM posts WHERE id = ?", [postId], (err, results) => {
+exports.deletePostById = (req, res) => {
+  const { id } = req.params;
+  db.query("DELETE FROM posts WHERE id = ?", [id], (err) => {
     if (err) {
-      res.status(500).json({ error: "Errore nell'eliminazione del post" });
+      console.error(err);
+      res.status(500).send("Server error");
     } else {
-      res.status(204).send(); // 204 significa "nessun contenuto"
+      res.status(204).send();
     }
   });
-};
-
-module.exports = {
-  getAllPosts,
-  getPostById,
-  deletePostById,
 };

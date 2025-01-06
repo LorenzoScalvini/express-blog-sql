@@ -1,13 +1,14 @@
 const express = require("express");
-const postRoutes = require("./routes/postRoutes");
-
 const app = express();
-const PORT = 3000;
+const postRoutes = require("./routes/posts");
+const port = 3000;
 
+// Middleware per il parsing JSON
 app.use(express.json());
 
+// Usa le rotte dei post
 app.use("/api", postRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server in ascolto su http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
 });
